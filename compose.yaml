@@ -1,0 +1,31 @@
+services:
+  seeder:
+    image: hdegroote/simple-seeder
+    hostname: seeder
+    ports:
+      - 40000:40000/udp
+    environment:
+      - SEED_LIST_KEY=pfexg4r8qz7tjhu33tox99r8knznquzxedzgjgtqrmzicmuteaby
+      - DHT_PORT=40000
+      - INSTRUMENT_HOST=seeder
+      - INSTRUMENT=TRUE
+      - REPL=FALSE
+  prometheus:
+    image: prom/prometheus
+    hostname: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command: --web.enable-lifecycle --config.file=/etc/prometheus/prometheus.yml --web.listen-address=:9090
+    depends_on:
+      - seeder
+  grafana:
+    image: grafana/grafana
+    hostname: grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
